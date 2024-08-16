@@ -178,213 +178,213 @@ for ires, residue in enumerate(syst_reslab):
 # Cluster Selection Section
 #=======================================
 
-## Set random seed
-#np.random.seed(42)
+# Set random seed
+np.random.seed(42)
 
-## Average compilation lists
-#ncoord_avg = np.zeros_like(syst_reslab, dtype=float)
-#ncoord_cnt = np.zeros_like(syst_reslab, dtype=int)
+# Average compilation lists
+ncoord_avg = np.zeros_like(syst_reslab, dtype=float)
+ncoord_cnt = np.zeros_like(syst_reslab, dtype=int)
         
-#for Ccluster, compilation in Ccluster_dict.items():
+for Ccluster, compilation in Ccluster_dict.items():
     
-    #for ic, compi in enumerate(compilation):
+    for ic, compi in enumerate(compilation):
         
-        ## Skip if cluster data file already exists
-        #data_file_i = data_file.format(Ccluster, ic)
-        #if os.path.exists(data_file_i):
-            #continue
+        # Skip if cluster data file already exists
+        data_file_i = data_file.format(Ccluster, ic)
+        if os.path.exists(data_file_i):
+            continue
         
-        ## Extract cluster conformations
-        #cluster_data = {}
-        #isel = 0
-        #itry = 0
-        #while isel < Ncluster:
+        # Extract cluster conformations
+        cluster_data = {}
+        isel = 0
+        itry = 0
+        while isel < Ncluster:
             
-            ## Choose random time step and center cluster residue
-            #ifdcd = np.random.choice(iruns)
-            #itime = np.random.randint(dcdsteps[ifdcd])
-            #inres = np.random.randint(numres[Ccluster])
+            # Choose random time step and center cluster residue
+            ifdcd = np.random.choice(iruns)
+            itime = np.random.randint(dcdsteps[ifdcd])
+            inres = np.random.randint(numres[Ccluster])
             
-            ## Initialize cluster data dictionary
-            #data = {}
+            # Initialize cluster data dictionary
+            data = {}
             
-            ## Open selected dcd file
-            #dcd = MDAnalysis.Universe(psffile, dcdfiles[ifdcd])
+            # Open selected dcd file
+            dcd = MDAnalysis.Universe(psffile, dcdfiles[ifdcd])
             
-            ## Get positions at selected time step
-            #positions = np.array(dcd.trajectory[itime]._pos, dtype=float)
+            # Get positions at selected time step
+            positions = np.array(dcd.trajectory[itime]._pos, dtype=float)
             
-            ## Get masses
-            #masses = dcd._topology.masses.values
+            # Get masses
+            masses = dcd._topology.masses.values
             
-            ## Get cell information
-            #cell = dcd.trajectory[itime]._unitcell
+            # Get cell information
+            cell = dcd.trajectory[itime]._unitcell
                 
-            ## Get center residue positions (pos_ccluster) 
-            ## and cluster center position (pos_ccenter)
-            #idx_ccluster = np.array(atomsint[Ccluster][inres], dtype=int)
-            #pos_ccluster = positions[idx_ccluster]
-            #if isinstance(syst_rescnt[Ccluster], (list, tuple)):
-                #idx_ccenter = idx_ccluster[
-                    #np.array(syst_rescnt[Ccluster], dtype=int)]
-                #totmass = np.sum(masses[idx_ccenter])
-                #pos_ccenter = np.sum([
-                    #positions[icenter]*masses[icenter] 
-                    #for icenter in idx_ccenter], axis=0)/totmass
-            #elif isinstance(syst_rescnt[Ccluster], int):
-                #pos_ccenter = positions[idx_ccluster[syst_rescnt[Ccluster]]]
-            #else:
-                #raise ValueError("Wrong cluster center definition")
+            # Get center residue positions (pos_ccluster) 
+            # and cluster center position (pos_ccenter)
+            idx_ccluster = np.array(atomsint[Ccluster][inres], dtype=int)
+            pos_ccluster = positions[idx_ccluster]
+            if isinstance(syst_rescnt[Ccluster], (list, tuple)):
+                idx_ccenter = idx_ccluster[
+                    np.array(syst_rescnt[Ccluster], dtype=int)]
+                totmass = np.sum(masses[idx_ccenter])
+                pos_ccenter = np.sum([
+                    positions[icenter]*masses[icenter] 
+                    for icenter in idx_ccenter], axis=0)/totmass
+            elif isinstance(syst_rescnt[Ccluster], int):
+                pos_ccenter = positions[idx_ccluster[syst_rescnt[Ccluster]]]
+            else:
+                raise ValueError("Wrong cluster center definition")
             
-            ## Center residue charge
-            #chr_ccluster = syst_reschr[Ccluster] 
+            # Center residue charge
+            chr_ccluster = syst_reschr[Ccluster] 
                 
-            ## Select other cluster residue positions (pos_rcluster)
-            #pos_rcluster_all = []
-            #res_rcluster_all = []
-            #sys_rcluster_all = []
-            #chr_rcluster_all = 0.0
-            #valid = True
-            #for ir, residue in enumerate(syst_reslab):
+            # Select other cluster residue positions (pos_rcluster)
+            pos_rcluster_all = []
+            res_rcluster_all = []
+            sys_rcluster_all = []
+            chr_rcluster_all = 0.0
+            valid = True
+            for ir, residue in enumerate(syst_reslab):
                 
-                ## Skip if residue not in system
-                #if not numres[residue]:
-                    #continue
+                # Skip if residue not in system
+                if not numres[residue]:
+                    continue
                 
-                ## Skip if selection also seen invalid
-                #if not valid:
-                    #continue
+                # Skip if selection also seen invalid
+                if not valid:
+                    continue
                 
-                ## Get all residue center positions
-                #pos_rcenter_all = []
-                #for ii in range(numres[residue]):
+                # Get all residue center positions
+                pos_rcenter_all = []
+                for ii in range(numres[residue]):
                     
-                    ## Get residue positions (pos_rcluster) 
-                    ## and residue center position (pos_rcenter)
-                    #idx_rcluster = np.array(atomsint[residue][ii], dtype=int)
-                    #pos_rcluster = positions[idx_rcluster]
-                    #if isinstance(syst_rescnt[residue], (list, tuple)):
-                        #idx_rcenter = idx_rcluster[
-                            #np.array(syst_rescnt[residue], dtype=int)]
-                        #totmass = np.sum(masses[idx_rcenter])
-                        #pos_rcenter = np.sum([
-                            #positions[icenter]*masses[icenter] 
-                            #for icenter in idx_rcenter], axis=0)/totmass
-                    #elif isinstance(syst_rescnt[residue], int):
-                        #pos_rcenter = positions[
-                            #idx_rcluster[syst_rescnt[residue]]]
-                    #else:
-                        #raise ValueError("Wrong cluster center definition")
+                    # Get residue positions (pos_rcluster) 
+                    # and residue center position (pos_rcenter)
+                    idx_rcluster = np.array(atomsint[residue][ii], dtype=int)
+                    pos_rcluster = positions[idx_rcluster]
+                    if isinstance(syst_rescnt[residue], (list, tuple)):
+                        idx_rcenter = idx_rcluster[
+                            np.array(syst_rescnt[residue], dtype=int)]
+                        totmass = np.sum(masses[idx_rcenter])
+                        pos_rcenter = np.sum([
+                            positions[icenter]*masses[icenter] 
+                            for icenter in idx_rcenter], axis=0)/totmass
+                    elif isinstance(syst_rescnt[residue], int):
+                        pos_rcenter = positions[
+                            idx_rcluster[syst_rescnt[residue]]]
+                    else:
+                        raise ValueError("Wrong cluster center definition")
             
-                    ## Append residue center position to list
-                    #pos_rcenter_all.append(pos_rcenter)
+                    # Append residue center position to list
+                    pos_rcenter_all.append(pos_rcenter)
                 
-                ## Get cluster center - residue center distances
-                #pos_rcenter_all = np.array(pos_rcenter_all)
-                #distances = distance_array(
-                    #pos_ccenter, pos_rcenter_all, box=cell).reshape(-1)
+                # Get cluster center - residue center distances
+                pos_rcenter_all = np.array(pos_rcenter_all)
+                distances = distance_array(
+                    pos_ccenter, pos_rcenter_all, box=cell).reshape(-1)
                 
-                ## Select cluster residues
-                #in_cluster_range = np.logical_and(
-                    #distances > 0.0,
-                    #distances < Rcluster)
-                #in_cluster_indices = np.where(in_cluster_range)[0]
+                # Select cluster residues
+                in_cluster_range = np.logical_and(
+                    distances > 0.0,
+                    distances < Rcluster)
+                in_cluster_indices = np.where(in_cluster_range)[0]
                 
-                ## Update cluster compilation average
-                #if ncoord_cnt[ir] == 0:
-                    #ncoord_avg[ir] = float(len(in_cluster_indices))
-                #else:
-                    #ncoord_avg[ir] = (
-                        #(
-                            #ncoord_avg[ir]*ncoord_cnt[ir] 
-                            #+ float(len(in_cluster_indices))
-                            #)/float(ncoord_cnt[ir] + 1)
-                        #)
-                #ncoord_cnt[ir] += 1
+                # Update cluster compilation average
+                if ncoord_cnt[ir] == 0:
+                    ncoord_avg[ir] = float(len(in_cluster_indices))
+                else:
+                    ncoord_avg[ir] = (
+                        (
+                            ncoord_avg[ir]*ncoord_cnt[ir] 
+                            + float(len(in_cluster_indices))
+                            )/float(ncoord_cnt[ir] + 1)
+                        )
+                ncoord_cnt[ir] += 1
                 
-                ## Sort by center distance
-                #dist_sorted = np.argsort(distances[in_cluster_range])
-                #in_cluster_indices = in_cluster_indices[dist_sorted]
-                #distances = distances[in_cluster_range][dist_sorted]
+                # Sort by center distance
+                dist_sorted = np.argsort(distances[in_cluster_range])
+                in_cluster_indices = in_cluster_indices[dist_sorted]
+                distances = distances[in_cluster_range][dist_sorted]
                 
-                ## Cut to selected compilation
-                #if compi[ir] and len(in_cluster_indices) < compi[ir]:
-                    #valid = False
-                    #continue
-                #elif not compi[ir] and len(in_cluster_indices):
-                    #valid = False
-                    #continue
-                #in_cluster_indices = in_cluster_indices[:compi[ir]]
+                # Cut to selected compilation
+                if compi[ir] and len(in_cluster_indices) < compi[ir]:
+                    valid = False
+                    continue
+                elif not compi[ir] and len(in_cluster_indices):
+                    valid = False
+                    continue
+                in_cluster_indices = in_cluster_indices[:compi[ir]]
                 
-                ## Append to cluster position array
-                #N_in_cluster_range = len(in_cluster_indices)
-                #if N_in_cluster_range:
-                    #idx_rcluster = np.array(
-                        #atomsint[residue][in_cluster_indices], dtype=int)
-                    #pos_rcluster = positions[idx_rcluster].reshape(-1, 3)
-                    #pos_rcluster_all += [list(posi) for posi in pos_rcluster]
+                # Append to cluster position array
+                N_in_cluster_range = len(in_cluster_indices)
+                if N_in_cluster_range:
+                    idx_rcluster = np.array(
+                        atomsint[residue][in_cluster_indices], dtype=int)
+                    pos_rcluster = positions[idx_rcluster].reshape(-1, 3)
+                    pos_rcluster_all += [list(posi) for posi in pos_rcluster]
                 
-                ## Append residue labels and residue atom symbols
-                #res_rcluster_all += [residue]*N_in_cluster_range
-                #sys_rcluster_all += [*syst_ressym[residue]]*N_in_cluster_range
+                # Append residue labels and residue atom symbols
+                res_rcluster_all += [residue]*N_in_cluster_range
+                sys_rcluster_all += [*syst_ressym[residue]]*N_in_cluster_range
                 
-                ## Add residue charges
-                #chr_rcluster_all += syst_reschr[residue]*N_in_cluster_range
+                # Add residue charges
+                chr_rcluster_all += syst_reschr[residue]*N_in_cluster_range
             
-            ## Skip if cluster is not valid
-            #if not valid:
-                #continue
+            # Skip if cluster is not valid
+            if not valid:
+                continue
             
-            ## Prepare data entries
-            #c_pos = [list(posi) for posi in pos_ccluster]
-            #c_sym = list(syst_ressym[Ccluster])
-            #c_chr = chr_ccluster
-            #r_pos = [list(posi) for posi in pos_rcluster_all]
-            #r_sym = list(sys_rcluster_all)
-            #r_chr = chr_rcluster_all
+            # Prepare data entries
+            c_pos = [list(posi) for posi in pos_ccluster]
+            c_sym = list(syst_ressym[Ccluster])
+            c_chr = chr_ccluster
+            r_pos = [list(posi) for posi in pos_rcluster_all]
+            r_sym = list(sys_rcluster_all)
+            r_chr = chr_rcluster_all
             
-            ## Wrap cluster positions
-            #positions = np.array((c_pos + r_pos), dtype=float)
-            #positions -= pos_ccenter
-            #for ip, posi in enumerate(positions):
-                #for jj in range(3):
-                    #positions[ip, jj] = (posi[jj] - cell[jj]/2.)%cell[jj]
-            #c_pos = [list(posi) for posi in positions[:len(c_sym)]]
-            #r_pos = [list(posi) for posi in positions[len(c_sym):]]
+            # Wrap cluster positions
+            positions = np.array((c_pos + r_pos), dtype=float)
+            positions -= pos_ccenter
+            for ip, posi in enumerate(positions):
+                for jj in range(3):
+                    positions[ip, jj] = (posi[jj] - cell[jj]/2.)%cell[jj]
+            c_pos = [list(posi) for posi in positions[:len(c_sym)]]
+            r_pos = [list(posi) for posi in positions[len(c_sym):]]
             
-            #cluster = Atoms(
-                #c_sym + r_sym, positions=(c_pos + r_pos), cell=cell, pbc=True)
-            #io.write(
-                #"cluster_{:s}_{:d}_{:03d}.xyz".format(
-                    #Ccluster, ic, isel), 
-                #cluster)
+            cluster = Atoms(
+                c_sym + r_sym, positions=(c_pos + r_pos), cell=cell, pbc=True)
+            io.write(
+                "cluster_{:s}_{:d}_{:03d}.xyz".format(
+                    Ccluster, ic, isel), 
+                cluster)
             
-            ## Add selection to data
-            #data['c_pos'] = c_pos
-            #data['c_sym'] = c_sym
-            #data['c_chr'] = c_chr
-            #data['r_pos'] = r_pos
-            #data['r_sym'] = r_sym
-            #data['r_chr'] = r_chr
-            #data['residues'] = list([Ccluster] + res_rcluster_all)
-            #cluster_data[isel] = data
+            # Add selection to data
+            data['c_pos'] = c_pos
+            data['c_sym'] = c_sym
+            data['c_chr'] = c_chr
+            data['r_pos'] = r_pos
+            data['r_sym'] = r_sym
+            data['r_chr'] = r_chr
+            data['residues'] = list([Ccluster] + res_rcluster_all)
+            cluster_data[isel] = data
             
-            ## Increment selection counter
-            #isel += 1
+            # Increment selection counter
+            isel += 1
             
-            ## Check tries
-            #itry += 1
-            #if itry > Ncluster*100:
-                #break
+            # Check tries
+            itry += 1
+            if itry > Ncluster*100:
+                break
 
-            ## Show average compilation
-            #print("Average Cluster compilation")
-            #for ir, residue in enumerate(syst_reslab):
-                #print("  ", residue, ncoord_avg[ir])
+            # Show average compilation
+            print("Average Cluster compilation")
+            for ir, residue in enumerate(syst_reslab):
+                print("  ", residue, ncoord_avg[ir])
 
-        ## Save cluster data
-        #with open(data_file_i, 'w') as f:
-            #json.dump(cluster_data, f, indent="  ")
+        # Save cluster data
+        with open(data_file_i, 'w') as f:
+            json.dump(cluster_data, f, indent="  ")
 
 
 
@@ -392,72 +392,72 @@ for ires, residue in enumerate(syst_reslab):
 ## Gaussian Computation Section
 ##=======================================
 
-## Create input directory
-#if not os.path.exists(gaussian_workdir):
-    #os.makedirs(gaussian_workdir)
+# Create input directory
+if not os.path.exists(gaussian_workdir):
+    os.makedirs(gaussian_workdir)
 
-#for Ccluster, compilation in Ccluster_dict.items():
+for Ccluster, compilation in Ccluster_dict.items():
     
-    #for ic, compi in enumerate(compilation):
+    for ic, compi in enumerate(compilation):
         
-        ## Read cluster data
-        #data_file_i = data_file.format(Ccluster, ic)
-        #with open(data_file_i, 'r') as f:
-            #cluster_data = json.load(f)
+        # Read cluster data
+        data_file_i = data_file.format(Ccluster, ic)
+        with open(data_file_i, 'r') as f:
+            cluster_data = json.load(f)
         
-        ## Create input files
-        #for ii, data in cluster_data.items():
+        # Create input files
+        for ii, data in cluster_data.items():
     
-            ## Working file names
-            #gaussian_input = gaussian_format_input.format(
-                #guassian_method, gaussian_basisset, Ccluster, ic, int(ii))
-            #gaussian_output = gaussian_format_output.format(
-                #guassian_method, gaussian_basisset, Ccluster, ic, int(ii))
+            # Working file names
+            gaussian_input = gaussian_format_input.format(
+                guassian_method, gaussian_basisset, Ccluster, ic, int(ii))
+            gaussian_output = gaussian_format_output.format(
+                guassian_method, gaussian_basisset, Ccluster, ic, int(ii))
             
-            ## Skip if output exists
-            #if os.path.exists(os.path.join(gaussian_workdir, gaussian_output)):
-                #continue
+            # Skip if output exists
+            if os.path.exists(os.path.join(gaussian_workdir, gaussian_output)):
+                continue
             
-            ## Prepare cluster data
-            #charge = round(data['c_chr'] + data['r_chr'])
-            #chargespin = '{:d} {:d} {:d} {:d} {:d} {:d}'.format(
-                #charge, gaussian_spin,
-                #round(data['c_chr']), gaussian_spin,
-                #round(data['r_chr']), gaussian_spin)
-            #atom_symbols = data['c_sym'] + data['r_sym']
-            #atom_fragment = [1]*len(data['c_sym']) + [2]*len(data['r_sym'])
-            #atom_positions = np.append(data['c_pos'], data['r_pos']).reshape(
-                #-1, 3)
-            #lines_positions = [
-                #"{:s}(Fragment={:d}) {:>20.15f} {:>20.15f} {:>20.15f}\n".format(
-                    #atom_symbol, atom_fragment[iatom], *atom_positions[iatom])
-                #for iatom, atom_symbol in enumerate(atom_symbols)
-                #if atom_symbol.lower() != 'X'.lower()]
-            #lines_positions = ("".join(lines_positions))[:-1]
+            # Prepare cluster data
+            charge = round(data['c_chr'] + data['r_chr'])
+            chargespin = '{:d} {:d} {:d} {:d} {:d} {:d}'.format(
+                charge, gaussian_spin,
+                round(data['c_chr']), gaussian_spin,
+                round(data['r_chr']), gaussian_spin)
+            atom_symbols = data['c_sym'] + data['r_sym']
+            atom_fragment = [1]*len(data['c_sym']) + [2]*len(data['r_sym'])
+            atom_positions = np.append(data['c_pos'], data['r_pos']).reshape(
+                -1, 3)
+            lines_positions = [
+                "{:s}(Fragment={:d}) {:>20.15f} {:>20.15f} {:>20.15f}\n".format(
+                    atom_symbol, atom_fragment[iatom], *atom_positions[iatom])
+                for iatom, atom_symbol in enumerate(atom_symbols)
+                if atom_symbol.lower() != 'X'.lower()]
+            lines_positions = ("".join(lines_positions))[:-1]
             
-            ## Create Gaussian input file
-            #with open(gaussian_template_input, 'r') as f:
-                #ginput = f.read()
-            #ginput = ginput.replace("%MEM%", str(gaussian_memory))
-            #ginput = ginput.replace("%CPU%", str(gaussian_ncpus))
-            #ginput = ginput.replace("%METHOD%", str(guassian_method))
-            #ginput = ginput.replace("%BASIS%", str(gaussian_basisset))
-            #ginput = ginput.replace("%NFR%", str(gaussian_counterpoise))
-            #ginput = ginput.replace("%CHARGESPIN%", str(chargespin))
-            #ginput = ginput.replace("%XYZ%", str(lines_positions))
-            #if "K" in atom_symbols:
-                #with open("template_gaussian_basisK.com", 'r') as f:
-                    #basisK = f.read()
-                #ginput += basisK
-            #ginput += '\n'
-            #with open(os.path.join(gaussian_workdir, gaussian_input), 'w') as f:
-                #f.write(ginput)
+            # Create Gaussian input file
+            with open(gaussian_template_input, 'r') as f:
+                ginput = f.read()
+            ginput = ginput.replace("%MEM%", str(gaussian_memory))
+            ginput = ginput.replace("%CPU%", str(gaussian_ncpus))
+            ginput = ginput.replace("%METHOD%", str(guassian_method))
+            ginput = ginput.replace("%BASIS%", str(gaussian_basisset))
+            ginput = ginput.replace("%NFR%", str(gaussian_counterpoise))
+            ginput = ginput.replace("%CHARGESPIN%", str(chargespin))
+            ginput = ginput.replace("%XYZ%", str(lines_positions))
+            if "K" in atom_symbols:
+                with open("template_gaussian_basisK.com", 'r') as f:
+                    basisK = f.read()
+                ginput += basisK
+            ginput += '\n'
+            with open(os.path.join(gaussian_workdir, gaussian_input), 'w') as f:
+                f.write(ginput)
             
-            ### Submit Gaussian job
-            ##subprocess.run(
-                ##'cd {:s} ; {:s} {:s} -q infinite'.format(
-                    ##gaussian_workdir, gaussian_gsub, gaussian_input), 
-                ##shell=True)
+            ## Submit Gaussian job
+            #subprocess.run(
+                #'cd {:s} ; {:s} {:s} -q infinite'.format(
+                    #gaussian_workdir, gaussian_gsub, gaussian_input), 
+                #shell=True)
 
 
 #=======================================

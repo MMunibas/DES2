@@ -1,0 +1,58 @@
+* Based in input of Maryam and Luis
+* Heating and Equilibrium Run
+*
+
+bomlev -1
+prnlev 5
+wrnlev 1
+
+!#########################################
+! Setup System
+!#########################################
+
+! Read topology and parameter files
+stream source/toppar.str
+
+! Read PSF
+open read unit 10 card name sample_files/sample_0.psf
+read psf  unit 10 card xplor
+
+!Read Coordinate
+open read unit 10 card name sample_files/sample_0_0.crd
+read coor unit 10 card
+
+!#########################################
+! Non-bonded Options / Constraints
+!#########################################
+
+! Electrostatic FDCM model
+OPEN UNIT 40 CARD READ NAME source/scn_fluc.dcm
+DCM FLUX 99 IUDCM 40 TSHIFT
+CLOSE UNIT 40
+
+! Block SCN-Solvent electrostatic for proper pVT behaviour
+block 2
+  call 2 sele resid 1 end
+  coeff 1 1 0.0
+end
+
+! Fix all atoms except central one
+!cons fix sele .not. resid 1 end
+
+set nsamples 50
+set n = 0
+
+label loop
+    
+    !Read Coordinate
+    open read unit 10 card name sample_files/sample_0_@n.crd
+    read coor unit 10 card
+    close unit 10
+    
+    energy
+    
+    increase n by 1
+
+if @n lt @nsamples goto loop
+
+stop

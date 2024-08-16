@@ -366,71 +366,71 @@ for Ccluster, compilation in Ccluster_dict.items():
 # Gaussian Computation Section
 #=======================================
 
-## Create input directory
-#if not os.path.exists(gaussian_workdir):
-    #os.makedirs(gaussian_workdir)
+# Create input directory
+if not os.path.exists(gaussian_workdir):
+    os.makedirs(gaussian_workdir)
 
-#for Ccluster, compilation in Ccluster_dict.items():
+for Ccluster, compilation in Ccluster_dict.items():
     
-    #for ic, compi in enumerate(compilation):
+    for ic, compi in enumerate(compilation):
         
-        ## Read cluster data
-        #data_file_i = data_file.format(Ccluster, ic)
-        #with open(data_file_i, 'r') as f:
-            #cluster_data = json.load(f)
+        # Read cluster data
+        data_file_i = data_file.format(Ccluster, ic)
+        with open(data_file_i, 'r') as f:
+            cluster_data = json.load(f)
         
-        ## Create input files
-        #for ii, data in cluster_data.items():
+        # Create input files
+        for ii, data in cluster_data.items():
     
-            ## Working file names
-            #gaussian_input = gaussian_format_input.format(
-                #guassian_method, gaussian_basisset, Ccluster, ic, int(ii))
-            #gaussian_output = gaussian_format_output.format(
-                #guassian_method, gaussian_basisset, Ccluster, ic, int(ii))
+            # Working file names
+            gaussian_input = gaussian_format_input.format(
+                guassian_method, gaussian_basisset, Ccluster, ic, int(ii))
+            gaussian_output = gaussian_format_output.format(
+                guassian_method, gaussian_basisset, Ccluster, ic, int(ii))
             
-            ## Skip if output exists
-            #if os.path.exists(os.path.join(gaussian_workdir, gaussian_output)):
-                #continue
+            # Skip if output exists
+            if os.path.exists(os.path.join(gaussian_workdir, gaussian_output)):
+                continue
             
-            ## Prepare cluster data
-            #charge = round(data['c_chr'] + data['r_chr'])
-            #chargespin = '{:d} {:d} {:d} {:d} {:d} {:d}'.format(
-                #charge, gaussian_spin,
-                #round(data['c_chr']), gaussian_spin,
-                #round(data['r_chr']), gaussian_spin)
-            #atom_symbols = data['c_sym'] + data['r_sym']
-            #atom_fragment = [1]*len(data['c_sym']) + [2]*len(data['r_sym'])
-            #atom_positions = np.append(data['c_pos'], data['r_pos']).reshape(
-                #-1, 3)
-            #lines_positions = [
-                #"{:s}(Fragment={:d}) {:>20.15f} {:>20.15f} {:>20.15f}\n".format(
-                    #atom_symbol, atom_fragment[iatom], *atom_positions[iatom])
-                #for iatom, atom_symbol in enumerate(atom_symbols)]
-            #lines_positions = ("".join(lines_positions))[:-1]
+            # Prepare cluster data
+            charge = round(data['c_chr'] + data['r_chr'])
+            chargespin = '{:d} {:d} {:d} {:d} {:d} {:d}'.format(
+                charge, gaussian_spin,
+                round(data['c_chr']), gaussian_spin,
+                round(data['r_chr']), gaussian_spin)
+            atom_symbols = data['c_sym'] + data['r_sym']
+            atom_fragment = [1]*len(data['c_sym']) + [2]*len(data['r_sym'])
+            atom_positions = np.append(data['c_pos'], data['r_pos']).reshape(
+                -1, 3)
+            lines_positions = [
+                "{:s}(Fragment={:d}) {:>20.15f} {:>20.15f} {:>20.15f}\n".format(
+                    atom_symbol, atom_fragment[iatom], *atom_positions[iatom])
+                for iatom, atom_symbol in enumerate(atom_symbols)]
+            lines_positions = ("".join(lines_positions))[:-1]
             
-            ## Create Gaussian input file
-            #with open(gaussian_template_input, 'r') as f:
-                #ginput = f.read()
-            #ginput = ginput.replace("%MEM%", str(gaussian_memory))
-            #ginput = ginput.replace("%CPU%", str(gaussian_ncpus))
-            #ginput = ginput.replace("%METHOD%", str(guassian_method))
-            #ginput = ginput.replace("%BASIS%", str(gaussian_basisset))
-            #ginput = ginput.replace("%NFR%", str(gaussian_counterpoise))
-            #ginput = ginput.replace("%CHARGESPIN%", str(chargespin))
-            #ginput = ginput.replace("%XYZ%", str(lines_positions))
-            #if "K" in atom_symbols:
-                #with open("template_gaussian_basisK.com", 'r') as f:
-                    #basisK = f.read()
-                #ginput += basisK
-            #ginput += '\n'
-            #with open(os.path.join(gaussian_workdir, gaussian_input), 'w') as f:
-                #f.write(ginput)
+            # Create Gaussian input file
+            with open(gaussian_template_input, 'r') as f:
+                ginput = f.read()
+            ginput = ginput.replace("%MEM%", str(gaussian_memory))
+            ginput = ginput.replace("%CPU%", str(gaussian_ncpus))
+            ginput = ginput.replace("%METHOD%", str(guassian_method))
+            ginput = ginput.replace("%BASIS%", str(gaussian_basisset))
+            ginput = ginput.replace("%NFR%", str(gaussian_counterpoise))
+            ginput = ginput.replace("%CHARGESPIN%", str(chargespin))
+            ginput = ginput.replace("%XYZ%", str(lines_positions))
+            if "K" in atom_symbols:
+                with open("template_gaussian_basisK.com", 'r') as f:
+                    basisK = f.read()
+                ginput += basisK
+            ginput += '\n'
+            with open(os.path.join(gaussian_workdir, gaussian_input), 'w') as f:
+                f.write(ginput)
             
-            ## Submit Gaussian job
-            #subprocess.run(
-                #'cd {:s} ; {:s} {:s} -q long'.format(
-                    #gaussian_workdir, gaussian_gsub, gaussian_input), 
-                #shell=True)
+            # Submit Gaussian job
+            subprocess.run(
+                'cd {:s} ; {:s} {:s} -q long'.format(
+                    gaussian_workdir, gaussian_gsub, gaussian_input), 
+                shell=True)
 
 
 #=======================================
